@@ -1,0 +1,48 @@
+services:
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    working_dir: /app
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    command: npm run dev
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+
+  server:
+    build:
+      context: .  # ビルドコンテキストをルートディレクトリに指定
+      dockerfile: server/Dockerfile  # Dockerfileのパスを指定
+    working_dir: /app
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=myapp
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=1000
+    depends_on:
+      - client
+      - db
+
+  db:
+    image: mysql:8.4
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: myapp
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db:/var/lib/mysql
