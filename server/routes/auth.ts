@@ -22,7 +22,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const { email, password } = req.body
     try {
         const user:any = await loginUser(email, password)
-        if (user) {
+        if (user.success) {
             const token = generateToken({ id: user.id, name: user.name, email: user.email })
             res.status(200).json({ message: 'ログイン成功', token })
         } else {
