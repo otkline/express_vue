@@ -9,4 +9,4 @@ COPY ./server .
 
 EXPOSE 3000
 
-CMD ["npx", "tsx", "watch", "index.ts"]
+CMD bash -c "node --loader ts-node/esm ./drizzle/scripts/watch-schema-index.ts & npx tsx watch index.ts"
