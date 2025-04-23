@@ -2,13 +2,12 @@ import { Request, Response, NextFunction } from 'express'
 import { verifyToken } from '../utils/jwt'
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction):void {
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({ message: 'Unauthorized' })
+    const token = req.cookies?.token
+    if (!token) {
+        res.status(401).json({ message: 'トークンが見つかりません' })
         return
     }
 
-    const token = authHeader.split(' ')[1]
     try {
         const decoded = verifyToken(token)
         req.user = {
@@ -17,7 +16,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
             email: decoded.email,
         }
         next()
-    } catch {
-        res.status(401).json({ message: 'Invalid token' })
+    } catch(err:any) {
+        if (err.name === 'TokenExpiredError') {
+            res.status(401).json({ message: 'トークンの有効期限が切れています' })
+            return
+        }
+        res.status(401).json({ message: '不正なトークンです' })
     }
 }

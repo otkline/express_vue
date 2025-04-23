@@ -27,7 +27,7 @@ router.post('/login', async (req: Request, res: Response) => {
             // トークンをjavascriptからアクセス不可なcookieに保存
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: true,    // 本番はtrue（HTTPS限定）
+                secure: process.env.NODE_ENV === 'production',    // 本番はtrue（HTTPS限定）
                 sameSite: 'lax', // または 'strict' にしてCSRF対策
                 maxAge: 1000 * 60 * 60 // 1h
             })
@@ -44,7 +44,7 @@ router.post('/login', async (req: Request, res: Response) => {
 router.post('/logout', async (req: Request, res: Response) => {
     res.clearCookie('token', {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax'
     })
     res.sendStatus(200)
