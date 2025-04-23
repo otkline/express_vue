@@ -24,7 +24,14 @@ router.post('/login', async (req: Request, res: Response) => {
         const user:any = await loginUser(email, password)
         if (user.success) {
             const token = generateToken({ id: user.id, name: user.name, email: user.email })
-            res.status(200).json({ message: 'ログイン成功', token })
+            // トークンをjavascriptからアクセス不可なcookieに保存
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: true,    // 本番はtrue（HTTPS限定）
+                sameSite: 'lax', // または 'strict' にしてCSRF対策
+                maxAge: 1000 * 60 * 60 // 1h
+            })
+            res.status(200).json({ message: 'ログイン成功' })
         } else {
             res.status(401).json({ error: 'メールアドレスまたはパスワードが正しくありません' })
         }
@@ -32,6 +39,15 @@ router.post('/login', async (req: Request, res: Response) => {
         console.error('ログインエラー:', err)
         res.status(500).json({ error: 'エラーが発生しました' })
     }
+})
+
+router.post('/logout', async (req: Request, res: Response) => {
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax'
+    })
+    res.sendStatus(200)
 })
 
 export default router

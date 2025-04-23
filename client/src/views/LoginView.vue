@@ -35,8 +35,6 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value
     })
-    // JWT認証トークン保存
-    localStorage.setItem('token', response.data.token)
 
     router.push('/')
   } catch (err: any) {
